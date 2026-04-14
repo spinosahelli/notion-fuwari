@@ -26,6 +26,7 @@ import { pluginLineNumbers } from "@expressive-code/plugin-line-numbers";
 import { expressiveCodeConfig } from "./src/config.ts";
 // import { pluginLanguageBadge } from "./src/plugins/expressive-code/language-badge.ts";
 import { pluginCustomCopyButton } from "./src/plugins/expressive-code/custom-copy-button.js";
+import rehypeEncrypt from './src/plugins/rehype-encrypt.mjs';
 import { defineConfig, passthroughImageService } from 'astro/config';
 // import vercel from "@astrojs/vercel"; // 静态构建不需要 adapter
 
