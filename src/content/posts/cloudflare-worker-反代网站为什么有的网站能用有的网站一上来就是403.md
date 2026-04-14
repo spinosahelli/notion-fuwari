@@ -1,7 +1,7 @@
 ---
 title: 'Cloudflare Worker 反代网站为什么有的网站能用，有的网站一上来就是 403？'
 published: 2026-04-05
-description: '很多人用 Cloudflare Worker 做反向代理时，都会遇到一个很玄学的问题：同样的代码，有的网站能正常代理，有的网站却一上来就是 403。问题往往不在 Worker 本身，而在目标站点的 WAF、Host/SNI、Access、防盗链和源站权限。'
+description: ''
 image: ''
 tags: ["Cloudflare", "serverless", "疑难杂症"]
 draft: false
