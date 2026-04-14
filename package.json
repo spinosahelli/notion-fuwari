@@ -89,7 +89,7 @@
 		"@types/mdast": "^4.0.4",
 		"@types/sanitize-html": "^2.15.0",
 		"hast-util-to-html": "^9.0.0",
-        "hast-util-from-html": "^2.0.0"
+        "hast-util-from-html": "^2.0.0",
 		"postcss-import": "^16.1.0",
 		"postcss-nesting": "^13.0.1",
 		"rehype": "^13.0.2"
