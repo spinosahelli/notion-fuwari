@@ -179,7 +179,7 @@ const jsonLd = {
             {(entry.data.description || remarkPluginFrontmatter.excerpt) && (
                 <div class="onload-animation mb-4">
                     <div class="text-black/75 dark:text-white/75 text-sm leading-relaxed">
-                        {entry.data.description || remarkPluginFrontmatter.excerpt}
+						{entry.data.password ? "这是一篇加密文章，请输入密码后查看。" : (entry.data.description || remarkPluginFrontmatter.excerpt)}
                     </div>
                 </div>
             )}
