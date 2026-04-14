@@ -11,6 +11,10 @@ on:
 jobs:
   sync-and-deploy:
     runs-on: ubuntu-latest
+    
+    # ▼▼▼ 新增：赋予 Action 读写仓库代码的权限（解决 git push 403 报错） ▼▼▼
+    permissions:
+      contents: write 
 
     steps:
       # 1. 检出代码
@@ -61,6 +65,8 @@ jobs:
             # 有更改，提交并推送
             SYNC_TIME=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')
             git commit -m "chore: 自动同步 Notion 文章" -m "📝 文章已从 Notion 自动同步" -m "🕐 同步时间: ${SYNC_TIME}" -m "🤖 由 GitHub Actions 自动提交"
+            
+            # ▼▼▼ 注意这里：如果你的仓库主分支叫 main，请将 master 改为 main ▼▼▼
             git push --force-with-lease origin master
             echo "✅ 成功同步并推送新文章"
           fi
