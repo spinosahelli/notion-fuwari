@@ -127,7 +127,8 @@ export default defineConfig({
             parseDirectiveNode,
         ],
         rehypePlugins: [
-            rehypeKatex,
+            rehypeEncrypt, 
+			rehypeKatex,
             rehypeSlug,
             [rehypeImageFallback, imageFallbackConfig],
             [
