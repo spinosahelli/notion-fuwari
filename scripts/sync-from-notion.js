@@ -118,7 +118,8 @@ function getPostMetadata(page) {
   const tags = properties.Tags?.multi_select?.map(tag => tag.name) || [];
   const category = properties.Category?.select?.name;
   // ▼▼▼ 新增：读取 password 字段 ▼▼▼
-  const password = properties.password?.rich_text?.[0]?.plain_text || properties.Password?.rich_text?.[0]?.plain_text || '';
+  const passwordProp = properties.password || properties.Password;
+  const password = passwordProp?.rich_text?.[0]?.plain_text || '';
 
   return {
     title,
