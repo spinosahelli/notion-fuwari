@@ -68,7 +68,10 @@ const { remarkPluginFrontmatter } = await entry.render();
 
         <!-- description -->
         <div class:list={["transition text-75 mb-3.5 pr-4", {"line-clamp-2 md:line-clamp-1": !description}]}>
-            { description || remarkPluginFrontmatter.excerpt }
+            { entry.data.password 
+                ? "🔒 这是一篇加密文章，请输入密码后查看全文。" 
+                : (description || remarkPluginFrontmatter.excerpt) 
+            }
         </div>
 
         <!-- word count, read time and page views -->
