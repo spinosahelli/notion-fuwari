@@ -117,6 +117,8 @@ function getPostMetadata(page) {
   const publishedDate = properties['Published Date']?.date?.start || new Date().toISOString();
   const tags = properties.Tags?.multi_select?.map(tag => tag.name) || [];
   const category = properties.Category?.select?.name;
+  // ▼▼▼ 新增：读取 password 字段 ▼▼▼
+  const password = properties.password?.rich_text?.[0]?.plain_text || properties.Password?.rich_text?.[0]?.plain_text || '';
 
   return {
     title,
@@ -125,6 +127,7 @@ function getPostMetadata(page) {
     publishedDate,
     tags,
     category,
+    password, // <--- 记得把 password 加到返回值里
   };
 }
 
@@ -293,7 +296,7 @@ async function fetchPublishedPosts() {
  * 处理单篇文章
  */
 async function processPost(page) {
-  const { title, slug, coverImage, publishedDate, tags, category } = getPostMetadata(page);
+  const { title, slug, coverImage, publishedDate, tags, category, password } = getPostMetadata(page);
 
   console.log(`\n📝 处理文章: ${title}`);
   console.log(`   Slug: ${slug}`);
@@ -331,6 +334,7 @@ async function processPost(page) {
 
   // 生成 frontmatter
   const categoryLine = category ? `category: '${category}'\n` : '';
+  const passwordLine = password ? `password: '${password}'\n` : ''; // <--- 新增这行
   const frontmatter = `---
 title: '${title.replace(/'/g, "''")}'
 published: ${publishedDate}
@@ -342,7 +346,7 @@ lang: 'zh-CN'
 translationKey: '${slug}'
 notionSync: true
 notionPageId: '${page.id}'
-${categoryLine}---
+${categoryLine}${passwordLine}---
 
 `;
 
