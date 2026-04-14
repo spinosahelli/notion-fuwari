@@ -294,5 +294,53 @@ const jsonLd = {
             </div>}
         </a>
     </div>
+    <script>
+        import CryptoJS from 'crypto-js';
+        import bcrypt from 'bcryptjs';
 
+        // 使用 'astro:page-load' 以正确支持 Astro 的 ViewTransitions
+        document.addEventListener('astro:page-load', () => {
+            const wrapper = document.getElementById('encrypted-post-wrapper');
+            if (!wrapper) return;
+
+            const btn = document.getElementById('post-decrypt-btn');
+            const input = document.getElementById('post-password-input');
+            const error = document.getElementById('post-decrypt-error');
+
+            const handleDecrypt = () => {
+                const password = (input as HTMLInputElement).value;
+                const hash = wrapper.dataset.hash;
+                const ciphertext = wrapper.dataset.ciphertext;
+
+                if (!password || !hash || !ciphertext) return;
+
+                // 1. 使用 bcrypt 快速验证密码
+                if (bcrypt.compareSync(password, hash)) {
+                    try {
+                        // 2. 如果验证通过，使用明文密码解密密文
+                        const bytes = CryptoJS.AES.decrypt(ciphertext, password);
+                        const originalHtml = bytes.toString(CryptoJS.enc.Utf8);
+                        
+                        // 3. 将解密后的 HTML 注入到 markdown 容器中
+                        const markdownContainer = wrapper.closest('.markdown-content');
+                        if (markdownContainer) {
+                            markdownContainer.innerHTML = originalHtml;
+                        }
+                    } catch (e) {
+                        error.classList.remove('hidden');
+                        error.innerText = '解密失败，数据可能已损坏。 / Decryption failed.';
+                    }
+                } else {
+                    // 密码不匹配
+                    error.classList.remove('hidden');
+                    error.innerText = '密码错误，请重试！ / Incorrect password!';
+                }
+            };
+
+            btn.addEventListener('click', handleDecrypt);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') handleDecrypt();
+            });
+        });
+    </script>
 </MainGridLayout>
