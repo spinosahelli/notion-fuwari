@@ -298,119 +298,138 @@ const jsonLd = {
     import CryptoJS from 'crypto-js';
     import bcrypt from 'bcryptjs';
 
-    // 设置免密缓存的有效期（例如：24小时）
-    const ENCRYPTION_EXPIRY_MS = 1000 * 60 * 60 * 24; 
+    const ENCRYPTION_EXPIRY_MS = 1000 * 60 * 60 * 24; // 24小时免密
 
-    document.addEventListener('astro:page-load', () => {
+    // 1. 检查缓存并尝试自动解密的函数
+    const checkAndUnlock = () => {
         const wrapper = document.getElementById('encrypted-post-wrapper');
-        if (!wrapper) return;
-
-        const btn = document.getElementById('post-decrypt-btn');
-        const input = document.getElementById('post-password-input');
-        const error = document.getElementById('post-decrypt-error');
+        // 如果没有加密框，或者已经解密过了，直接跳过
+        if (!wrapper || wrapper.dataset.decrypted === 'true') return;
 
         const hash = wrapper.dataset.hash;
         const ciphertext = wrapper.dataset.ciphertext;
         const slug = window.location.pathname;
-        const storageKey = `unlocked_post_${slug}`; // 为每篇文章生成独立的缓存 Key
+        const storageKey = `unlocked_post_${slug}`;
 
-        // 执行解密并替换 DOM 内容的函数
-        const unlockContent = (password) => {
-            try {
-                const bytes = CryptoJS.AES.decrypt(ciphertext, password);
-                const originalHtml = bytes.toString(CryptoJS.enc.Utf8);
-                
-                if (!originalHtml) throw new Error("解密结果为空");
-
-                const markdownContainer = wrapper.closest('.markdown-content');
-                if (markdownContainer) {
-                    // 添加平滑的淡出过渡动画
-                    wrapper.style.opacity = '0';
-                    wrapper.style.transition = 'opacity 0.3s ease';
-                    
-                    setTimeout(() => {
-                        markdownContainer.innerHTML = originalHtml;
-                        // 触发可能需要的代码高亮/组件重新渲染事件
-                        document.dispatchEvent(new Event('content-decrypted'));
-                    }, 300);
-                    return true;
-                }
-            } catch (e) {
-                console.error("解密失败:", e);
-                return false;
-            }
-            return false;
-        };
-
-        // 1. 页面加载时：检查 localStorage 是否已有未过期的密码缓存
         const storedSession = localStorage.getItem(storageKey);
         if (storedSession) {
             try {
                 const { password, timestamp } = JSON.parse(storedSession);
-                // 检查是否过期
                 if (Date.now() - timestamp < ENCRYPTION_EXPIRY_MS) {
-                    // 快速验证缓存密码是否正确
                     if (bcrypt.compareSync(password, hash)) {
-                        unlockContent(password);
-                        return; // 直接解锁，不显示密码框
+                        performUnlock(wrapper, ciphertext, password);
                     } else {
                         localStorage.removeItem(storageKey);
                     }
                 } else {
-                    localStorage.removeItem(storageKey); // 已过期，清理
+                    localStorage.removeItem(storageKey);
                 }
             } catch (e) {
                 localStorage.removeItem(storageKey);
             }
         }
+    };
 
-        // 2. 处理用户手动点击解锁
-        const handleDecrypt = () => {
-            const password = (input as HTMLInputElement).value;
-            if (!password || !hash || !ciphertext) return;
+    // 2. 执行核心解密逻辑
+    const performUnlock = (wrapper, ciphertext, password) => {
+        try {
+            const bytes = CryptoJS.AES.decrypt(ciphertext, password);
+            const originalHtml = bytes.toString(CryptoJS.enc.Utf8);
+            if (!originalHtml) throw new Error("解密结果为空");
 
-            // 锁定按钮，防止重复点击导致浏览器卡死
-            btn.textContent = "正在解锁...";
-            btn.style.opacity = '0.7';
-            btn.style.pointerEvents = 'none';
-            error.classList.add('hidden');
+            const markdownContainer = wrapper.closest('.markdown-content');
+            if (markdownContainer) {
+                wrapper.dataset.decrypted = 'true'; // 标记为已解密
+                wrapper.style.opacity = '0';
+                wrapper.style.transition = 'opacity 0.3s ease';
+                
+                setTimeout(() => {
+                    markdownContainer.innerHTML = originalHtml;
+                }, 300);
+                return true;
+            }
+        } catch (e) {
+            console.error("解密失败:", e);
+            return false;
+        }
+        return false;
+    };
 
-            // ⚠️ 关键：使用 setTimeout 将重度运算放到事件循环的下一步，防止 "正在解锁..." 文本渲染不出来
-            setTimeout(() => {
-                if (bcrypt.compareSync(password, hash)) {
-                    const success = unlockContent(password);
-                    
-                    if (success) {
-                        // 解密成功，将密码和当前时间存入 localStorage
-                        localStorage.setItem(storageKey, JSON.stringify({
-                            password: password,
-                            timestamp: Date.now()
-                        }));
-                    } else {
-                        error.classList.remove('hidden');
-                        error.innerText = '解密失败，数据可能已损坏。 / Decryption failed.';
-                        resetBtn();
-                    }
-                } else {
-                    error.classList.remove('hidden');
-                    error.innerText = '密码错误，请重试！ / Incorrect password!';
-                    resetBtn();
-                }
-            }, 50);
-        };
-
-        const resetBtn = () => {
-            btn.textContent = "解锁 / Unlock";
-            btn.style.opacity = '1';
-            btn.style.pointerEvents = 'auto';
-        };
-
-        if (btn && input) {
-            btn.addEventListener('click', handleDecrypt);
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') handleDecrypt();
-            });
+    // 3. 事件委托：处理点击解锁按钮 (无视 SPA 路由刷新问题)
+    document.addEventListener('click', (e) => {
+        // 向上寻找点击的元素是否是我们的解密按钮
+        let target = e.target;
+        while (target && target !== document) {
+            if (target.id === 'post-decrypt-btn') {
+                handleDecryptClick();
+                return;
+            }
+            target = target.parentNode;
         }
     });
+
+    // 4. 事件委托：处理回车键提交密码
+    document.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter' && e.target && e.target.id === 'post-password-input') {
+            handleDecryptClick();
+        }
+    });
+
+    // 处理解密交互
+    const handleDecryptClick = () => {
+        const wrapper = document.getElementById('encrypted-post-wrapper');
+        const input = document.getElementById('post-password-input');
+        const error = document.getElementById('post-decrypt-error');
+        const btn = document.getElementById('post-decrypt-btn');
+
+        if (!wrapper || !input || !error || !btn) return;
+
+        const password = input.value;
+        const hash = wrapper.dataset.hash;
+        const ciphertext = wrapper.dataset.ciphertext;
+        const slug = window.location.pathname;
+        const storageKey = `unlocked_post_${slug}`;
+
+        if (!password) return;
+
+        btn.textContent = "正在解锁...";
+        btn.style.pointerEvents = 'none';
+        btn.style.opacity = '0.7';
+        error.classList.add('hidden');
+
+        setTimeout(() => {
+            if (bcrypt.compareSync(password, hash)) {
+                const success = performUnlock(wrapper, ciphertext, password);
+                if (success) {
+                    localStorage.setItem(storageKey, JSON.stringify({ password, timestamp: Date.now() }));
+                } else {
+                    showError(error, btn, '解密失败，数据可能已损坏。');
+                }
+            } else {
+                showError(error, btn, '密码错误，请重试！');
+            }
+        }, 50);
+    };
+
+    const showError = (errorEl, btnEl, msg) => {
+        errorEl.innerText = msg;
+        errorEl.classList.remove('hidden');
+        btnEl.textContent = "解锁 / Unlock";
+        btnEl.style.pointerEvents = 'auto';
+        btnEl.style.opacity = '1';
+    };
+
+    // 5. 监听 DOM 变化：完美兼容单页应用(SPA)跳转
+    // 只要检测到页面中出现了加密框，立刻执行免密检查
+    const observer = new MutationObserver(() => {
+        if (document.getElementById('encrypted-post-wrapper')) {
+            checkAndUnlock();
+        }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+    
+    // 首屏加载执行一次
+    document.addEventListener('DOMContentLoaded', checkAndUnlock);
+
 </script>
 </MainGridLayout>
