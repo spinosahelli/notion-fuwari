@@ -13,7 +13,7 @@ import { LinkPreset } from "./types/config";
 
 export const siteConfig: SiteConfig = {
 	title: "雪泥煮月",
-	subtitle: "生活记录与个人思考",
+	subtitle: "记录生活感悟与个人思考",
 	description:
 		"没那么多讲究，就是记点东西，顺便煮个月亮",
 
@@ -30,7 +30,7 @@ export const siteConfig: SiteConfig = {
 
 		position: "center", // Equivalent to object-position, only supports 'top', 'center', 'bottom'. 'center' by default
 		credit: {
-			enable: true, // Display the credit text of the banner image
+			enable: false, // Display the credit text of the banner image
 			text: "Pixiv @chokei", // Credit text to be displayed
 
 			url: "https://www.pixiv.net/artworks/122782209", // (Optional) URL link to the original artwork or artist's page
@@ -102,9 +102,9 @@ export const profileConfig: ProfileConfig = {
 		"/profile/avatar/69108294_p7.jpg",
 		"/profile/avatar/98308336_p5.png",
 	],
-	name: "叶桐",
-	bio: "無くした日々にさよなら",
-	links: [
+	name: "既望生",
+	bio: "其声清越以长",
+	//links: [
 		{
 			name: "知乎",
 			icon: "fa6-brands:zhihu",
@@ -160,39 +160,39 @@ export const statsConfig = {
 export const analyticsConfig: AnalyticsConfig = {
 	// Umami 云端分析（原作者的配置，建议删除或替换）
 	umamiCloud: {
-		enable: true,
-		websiteId: "526149f7-e7d5-40ac-ae75-50a0c2515abf",
+		enable: false,
+		websiteId: "",
 	},
 	// 百度统计（原作者的配置，建议删除或替换）
 	baidu: {
 		enable: false,
-		id: "b219eaad631b87d273cfe72148b2138b",
+		id: "",
 	},
 	// Microsoft Clarity（原作者的配置，建议删除或替换）
 	clarity: {
 		enable: false,
-		projectId: "t8f0gmcwtx",
+		projectId: "",
 	},
 	// Google AdSense（原作者的广告ID，建议删除或替换）
 	googleAdsense: {
 		enable: false,
-		publisherId: "ca-pub-1683686345039700",
+		publisherId: "",
 	},
 	// Google Analytics（原作者的配置，建议删除或替换）
 	googleAnalytics: {
-		enable: true,
-		measurementId: "G-D9ZRKT7G85",
+		enable: false,
+		measurementId: "",
 	},
 	// Cloudflare Web Analytics（原作者的配置，建议删除或替换）
 	cloudflare: {
 		enable: false,
-		token: "15fe148e91b34f10a15652e1a74ab26c",
+		token: "",
 	},
 };
 
 // AI 聊天配置
 export const aiChatConfig = {
-	enable: true, // 设置为 true 启用 AI 聊天功能
+	enable: false, // 设置为 true 启用 AI 聊天功能
 	// API 端点 - 使用 Cloudflare Pages Functions
 	apiEndpoint: "/api/ai-search",
 	// 可选：自定义欢迎消息
