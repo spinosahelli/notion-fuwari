@@ -111,15 +111,22 @@ function getPostManagementType(filepath) {
  */
 function getPostMetadata(page) {
   const properties = page.properties;
-  const title = properties.Title?.title[0]?.plain_text || 'Untitled';
+  
+  // 安全地获取标题，防止由于空标题导致的报错
+  const title = properties.Title?.title?.[0]?.plain_text || properties.Name?.title?.[0]?.plain_text || 'Untitled';
   const slug = generateSlug(title);
-  const coverImage = properties['Featured Image']?.files[0]?.file.url;
+  const coverImage = properties['Featured Image']?.files?.[0]?.file?.url;
   const publishedDate = properties['Published Date']?.date?.start || new Date().toISOString();
   const tags = properties.Tags?.multi_select?.map(tag => tag.name) || [];
   const category = properties.Category?.select?.name;
-  // ▼▼▼ 新增：读取 password 字段 ▼▼▼
-  const passwordProp = properties.password || properties.Password;
-  const password = passwordProp?.rich_text?.[0]?.plain_text || '';
+  
+  // ▼▼▼ 完美兼容“加密”与“不加密”文章的安全写法 ▼▼▼
+  let password = '';
+  const pwdProp = properties.password || properties.Password; // 兼容大小写
+  // 只有当属性存在，且 rich_text 数组里真的有内容（length > 0）时，才去提取密码
+  if (pwdProp && pwdProp.rich_text && pwdProp.rich_text.length > 0) {
+      password = pwdProp.rich_text[0].plain_text;
+  }
 
   return {
     title,
@@ -128,7 +135,7 @@ function getPostMetadata(page) {
     publishedDate,
     tags,
     category,
-    password, // <--- 记得把 password 加到返回值里
+    password, // 返回提取到的密码（如果没有密码，这里就是空字符串 ''）
   };
 }
 
