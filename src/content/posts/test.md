@@ -9,6 +9,7 @@ lang: 'zh-CN'
 translationKey: 'test'
 notionSync: true
 notionPageId: '34137893-2b32-8064-a67e-e4a4bb127a21'
+category: '技术分享'
 password: 'test'
 ---
 
