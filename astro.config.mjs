@@ -35,7 +35,7 @@ export default defineConfig({
     image: {
         service: passthroughImageService()
     },
-    site: "https://blog.chaosyn.com",
+    site: "https://notion-fuwari-eight.vercel.app/",
     base: "/",
     trailingSlash: "always",
     output: "static",
