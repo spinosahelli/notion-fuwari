@@ -66,7 +66,9 @@ jobs:
             SYNC_TIME=$(TZ='Asia/Shanghai' date '+%Y-%m-%d %H:%M:%S')
             git commit -m "chore: 自动同步 Notion 文章" -m "📝 文章已从 Notion 自动同步" -m "🕐 同步时间: ${SYNC_TIME}" -m "🤖 由 GitHub Actions 自动提交"
             
-            # 注意：请确认你的主分支是 main 还是 master。目前绝大多数默认是 main
-            git push --force-with-lease origin master
+            # ▼▼▼ 修复点：先拉取远程最新代码并合并，防止冲突 ▼▼▼
+            git pull --rebase origin master
+            
+            git push origin master
             echo "✅ 成功同步并推送新文章"
           fi
