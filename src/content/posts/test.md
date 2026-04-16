@@ -3,7 +3,7 @@ title: 'test'
 published: 2026-04-13
 description: '---'
 image: ''
-tags: []
+tags: ["notionnext"]
 draft: false
 lang: 'zh-CN'
 translationKey: 'test'
